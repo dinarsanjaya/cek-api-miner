@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Heartbeat Monitor</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Courier New', monospace;
+      background: #0f0f0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .card {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #22c55e;
+      border: 1px solid #16a34a;
+      animation: blink 1s ease-in-out infinite;
+    }
+    .title { font-size: 13px; font-weight: 600; color: #f0f0f0; }
+    .subtitle { font-size: 11px; color: #666; }
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .controls label { font-size: 12px; color: #888; }
+    select, button {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid #333;
+      background: #111;
+      color: #e0e0e0;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    select:hover, button:hover { border-color: #555; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .stat-box {
+      background: #111;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .stat-label { font-size: 11px; color: #666; margin-bottom: 2px; }
+    .stat-value { font-size: 18px; font-weight: 600; color: #f0f0f0; }
+    .stat-value.green { color: #22c55e; }
+    .stat-value.red   { color: #ef4444; }
+    #log {
+      background: #111;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 12px;
+      height: 300px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .log-placeholder {
+      color: #555;
+      font-size: 12px;
+      text-align: center;
+      margin: auto;
+    }
+    .log-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      animation: slideIn .2s ease-out;
+    }
+    .log-row.ok   { background: rgba(34,197,94,.1); }
+    .log-row.err  { background: rgba(239,68,68,.1); }
+    .log-row.timeout { background: rgba(100,100,100,.1); }
+    .log-ts   { color: #666; min-width: 100px; }
+    .log-code { font-weight: 600; min-width: 36px; text-align: center; }
+    .log-code.ok      { color: #22c55e; }
+    .log-code.err     { color: #ef4444; }
+    .log-code.timeout { color: #888; }
+    .log-ms   { color: #888; min-width: 64px; }
+    .log-note { font-size: 11px; flex: 1; }
+    .log-note.ok      { color: #22c55e; }
+    .log-note.err     { color: #ef4444; }
+    .log-note.timeout { color: #888; }
+    .footer {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #666;
+    }
+    @keyframes blink {
+      0%,100% { opacity: 1; }
+      50%      { opacity: .3; }
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%,100% { transform: scale(1); }
+      50%     { transform: scale(1.4); }
+    }
+    .beat { animation: pulse .3s ease-out; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #111; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+
+    <div class="header">
+      <div class="header-left">
+        <div id="dot"></div>
+        <span class="title">Heartbeat Monitor</span>
+        <span class="subtitle">api.minework.net</span>
+      </div>
+      <div class="controls">
+        <label>interval</label>
+        <select id="interval-sel">
+          <option value="1000" selected>1s</option>
+          <option value="5000">5s</option>
+          <option value="10000">10s</option>
+          <option value="30000">30s</option>
+        </select>
+        <button id="toggle" onclick="toggleMonitor()">Pause</button>
+        <button onclick="clearLog()">Clear</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-box">
+        <div class="stat-label">total</div>
+        <div class="stat-value" id="stat-total">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">success</div>
+        <div class="stat-value green" id="stat-ok">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">failed</div>
+        <div class="stat-value red" id="stat-fail">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">avg ms</div>
+        <div class="stat-value" id="stat-avg">—</div>
+      </div>
+    </div>
+
+    <div id="log">
+      <div class="log-placeholder">Waiting for first ping...</div>
+    </div>
+
+    <div class="footer">
+      <span>next ping in <span id="countdown">—</span></span>
+      <span id="last-status">—</span>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const URL = 'https://api.minework.net/api/mining/v1/heartbeat';
+  let running = true, timer = null, cdTimer = null;
+  let total = 0, ok = 0, fail = 0, times = [], cdVal = 0;
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function now() {
+    const d = new Date();
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${String(d.getMilliseconds()).padStart(3,'0')}`;
+  }
+
+  function addRow(code, ms, ts) {
+    const log = document.getElementById('log');
+    const ph = log.querySelector('.log-placeholder');
+    if (ph) ph.remove();
+
+    const is2xx = code >= 200 && code < 300;
+    const cls   = is2xx ? 'ok' : code === 0 ? 'timeout' : 'err';
+    const label = code === 0 ? 'ERR' : code;
+    const note  = is2xx ? '✓ ok' : code === 0 ? '✕ timeout / error' : '! http error';
+
+    const row = document.createElement('div');
+    row.className = `log-row ${cls}`;
+    row.innerHTML = `
+      <span class="log-ts">${ts}</span>
+      <span class="log-code ${cls}">${label}</span>
+      <span class="log-ms">${ms > 0 ? ms + 'ms' : '—'}</span>
+      <span class="log-note ${cls}">${note}</span>
+    `;
+    log.insertBefore(row, log.firstChild);
+    if (log.children.length > 200) log.removeChild(log.lastChild);
+
+    const dot = document.getElementById('dot');
+    dot.style.background     = is2xx ? '#22c55e' : '#ef4444';
+    dot.style.borderColor    = is2xx ? '#16a34a' : '#b91c1c';
+    dot.classList.remove('beat');
+    void dot.offsetWidth;
+    dot.classList.add('beat');
+
+    document.getElementById('last-status').textContent = `last: ${label} · ${ms > 0 ? ms + 'ms' : 'n/a'}`;
+  }
+
+  function updateStats() {
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-ok').textContent    = ok;
+    document.getElementById('stat-fail').textContent  = fail;
+    document.getElementById('stat-avg').textContent   =
+      times.length ? Math.round(times.reduce((a,b) => a+b, 0) / times.length) + 'ms' : '—';
+  }
+
+  function startCountdown() {
+    clearInterval(cdTimer);
+    const iv = parseInt(document.getElementById('interval-sel').value);
+    cdVal = Math.round(iv / 1000);
+    document.getElementById('countdown').textContent = cdVal + 's';
+    cdTimer = setInterval(() => {
+      cdVal = Math.max(0, cdVal - 1);
+      document.getElementById('countdown').textContent = cdVal + 's';
+    }, 1000);
+  }
+
+  async function ping() {
+    if (!running) return;
+    const ts = now();
+    const t0 = performance.now();
+    let code = 0, ms = 0;
+    try {
+      const r = await fetch(URL, { signal: AbortSignal.timeout(10000) });
+      ms   = Math.round(performance.now() - t0);
+      code = r.status;
+    } catch(e) {
+      ms   = Math.round(performance.now() - t0);
+      code = 0;
+    }
+    total++;
+    if (code >= 200 && code < 300) { ok++; times.push(ms); if (times.length > 50) times.shift(); }
+    else fail++;
+    addRow(code, ms, ts);
+    updateStats();
+    scheduleNext();
+  }
+
+  function scheduleNext() {
+    if (!running) return;
+    const iv = parseInt(document.getElementById('interval-sel').value);
+    startCountdown();
+    timer = setTimeout(ping, iv);
+  }
+
+  function toggleMonitor() {
+    running = !running;
+    document.getElementById('toggle').textContent = running ? 'Pause' : 'Resume';
+    const dot = document.getElementById('dot');
+    dot.style.animationPlayState = running ? 'running' : 'paused';
+    if (running) {
+      ping();
+    } else {
+      clearTimeout(timer);
+      clearInterval(cdTimer);
+      document.getElementById('countdown').textContent = '—';
+    }
+  }
+
+  function clearLog() {
+    const log = document.getElementById('log');
+    log.innerHTML = '<div class="log-placeholder">Waiting for first ping...</div>';
+  }
+
+  document.getElementById('interval-sel').addEventListener('change', () => {
+    clearTimeout(timer);
+    clearInterval(cdTimer);
+    if (running) ping();
+  });
+
+  ping();
+</script>
+</body>
+</html>
