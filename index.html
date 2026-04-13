@@ -1,314 +1,678 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Heartbeat Monitor</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Courier New', monospace;
-      background: #0f0f0f;
-      color: #e0e0e0;
-      min-height: 100vh;
-      padding: 24px;
-    }
-    .container {
-      max-width: 680px;
-      margin: 0 auto;
-    }
-    .card {
-      background: #1a1a1a;
-      border: 1px solid #2a2a2a;
-      border-radius: 12px;
-      padding: 20px;
-    }
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
-    }
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    #dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: #22c55e;
-      border: 1px solid #16a34a;
-      animation: blink 1s ease-in-out infinite;
-    }
-    .title { font-size: 13px; font-weight: 600; color: #f0f0f0; }
-    .subtitle { font-size: 11px; color: #666; }
-    .controls {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .controls label { font-size: 12px; color: #888; }
-    select, button {
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: 6px;
-      border: 1px solid #333;
-      background: #111;
-      color: #e0e0e0;
-      cursor: pointer;
-      font-family: inherit;
-    }
-    select:hover, button:hover { border-color: #555; }
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-    .stat-box {
-      background: #111;
-      border: 1px solid #2a2a2a;
-      border-radius: 8px;
-      padding: 10px 12px;
-    }
-    .stat-label { font-size: 11px; color: #666; margin-bottom: 2px; }
-    .stat-value { font-size: 18px; font-weight: 600; color: #f0f0f0; }
-    .stat-value.green { color: #22c55e; }
-    .stat-value.red   { color: #ef4444; }
-    #log {
-      background: #111;
-      border: 1px solid #2a2a2a;
-      border-radius: 8px;
-      padding: 12px;
-      height: 300px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .log-placeholder {
-      color: #555;
-      font-size: 12px;
-      text-align: center;
-      margin: auto;
-    }
-    .log-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 5px 8px;
-      border-radius: 6px;
-      font-size: 12px;
-      animation: slideIn .2s ease-out;
-    }
-    .log-row.ok   { background: rgba(34,197,94,.1); }
-    .log-row.err  { background: rgba(239,68,68,.1); }
-    .log-row.timeout { background: rgba(100,100,100,.1); }
-    .log-ts   { color: #666; min-width: 100px; }
-    .log-code { font-weight: 600; min-width: 36px; text-align: center; }
-    .log-code.ok      { color: #22c55e; }
-    .log-code.err     { color: #ef4444; }
-    .log-code.timeout { color: #888; }
-    .log-ms   { color: #888; min-width: 64px; }
-    .log-note { font-size: 11px; flex: 1; }
-    .log-note.ok      { color: #22c55e; }
-    .log-note.err     { color: #ef4444; }
-    .log-note.timeout { color: #888; }
-    .footer {
-      margin-top: 10px;
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      color: #666;
-    }
-    @keyframes blink {
-      0%,100% { opacity: 1; }
-      50%      { opacity: .3; }
-    }
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(-6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes pulse {
-      0%,100% { transform: scale(1); }
-      50%     { transform: scale(1.4); }
-    }
-    .beat { animation: pulse .3s ease-out; }
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: #111; }
-    ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heartbeat Monitor — MineWork</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #080b0f;
+  --bg2:       #0d1117;
+  --bg3:       #131920;
+  --border:    #1e2a35;
+  --border2:   #243040;
+  --text:      #c9d4e0;
+  --text2:     #5a7080;
+  --text3:     #3a5060;
+  --green:     #00e676;
+  --green-dim: rgba(0,230,118,.12);
+  --green-glow:rgba(0,230,118,.25);
+  --red:       #ff5252;
+  --red-dim:   rgba(255,82,82,.12);
+  --amber:     #ffca28;
+  --amber-dim: rgba(255,202,40,.10);
+  --blue:      #40c4ff;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  min-height: 100dvh;
+  padding: 16px;
+  overflow-x: hidden;
+}
+
+/* === SCANLINE OVERLAY === */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,.15) 2px,
+    rgba(0,0,0,.15) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+  opacity: .4;
+}
+
+.wrap {
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* === TOP BAR === */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  gap: 12px;
+}
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.pulse-ring {
+  position: relative;
+  width: 14px; height: 14px;
+  flex-shrink: 0;
+}
+.pulse-ring::before {
+  content: '';
+  position: absolute; inset: -4px;
+  border-radius: 50%;
+  border: 1.5px solid var(--green);
+  animation: ring 1.4s ease-out infinite;
+  opacity: 0;
+}
+#dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green-glow);
+  transition: background .3s, box-shadow .3s;
+  position: relative;
+  z-index: 1;
+}
+.site-title {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  color: #e8f0f8;
+  letter-spacing: .3px;
+}
+.site-url {
+  font-size: 11px;
+  color: var(--text2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+select {
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--text);
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a7080'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 7px center;
+  padding-right: 22px;
+}
+select:focus { border-color: var(--blue); }
+.btn {
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  white-space: nowrap;
+}
+.btn:hover { border-color: var(--blue); background: rgba(64,196,255,.07); }
+.btn:active { transform: scale(.97); }
+.btn.danger:hover { border-color: var(--red); background: var(--red-dim); }
+
+/* === STATS GRID === */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.stat {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  overflow: hidden;
+}
+.stat::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: 10px 10px 0 0;
+  background: var(--accent, transparent);
+  transition: background .3s;
+}
+.stat.s-total  { --accent: var(--blue); }
+.stat.s-ok     { --accent: var(--green); }
+.stat.s-fail   { --accent: var(--red); }
+.stat.s-avg    { --accent: var(--amber); }
+.stat-label {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--text2);
+}
+.stat-val {
+  font-size: clamp(20px, 4vw, 26px);
+  font-weight: 600;
+  color: #e8f0f8;
+  line-height: 1;
+}
+.stat.s-ok   .stat-val { color: var(--green); }
+.stat.s-fail .stat-val { color: var(--red); }
+.stat.s-avg  .stat-val { color: var(--amber); }
+
+/* === LOG PANEL === */
+.log-panel {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.log-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  gap: 8px;
+}
+.log-header-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text2);
+}
+.log-cols {
+  display: grid;
+  grid-template-columns: 110px 52px 70px 1fr;
+  gap: 8px;
+  padding: 6px 14px;
+  font-size: 10px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--border);
+}
+#log {
+  height: clamp(240px, 45vh, 380px);
+  overflow-y: auto;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  scroll-behavior: smooth;
+}
+#log::-webkit-scrollbar { width: 4px; }
+#log::-webkit-scrollbar-track { background: transparent; }
+#log::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+.placeholder {
+  color: var(--text3);
+  font-size: 12px;
+  text-align: center;
+  margin: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.placeholder .icon {
+  font-size: 20px;
+  opacity: .4;
+  animation: blink 2s ease-in-out infinite;
+}
+.log-row {
+  display: grid;
+  grid-template-columns: 110px 52px 70px 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  animation: rowIn .2s ease-out;
+}
+.log-row.ok      { background: var(--green-dim); }
+.log-row.err     { background: var(--red-dim); }
+.log-row.timeout { background: rgba(90,112,128,.07); }
+.log-ts   { color: var(--text2); font-size: 11px; }
+.log-code { font-weight: 600; text-align: center; font-size: 13px; }
+.log-code.ok      { color: var(--green); }
+.log-code.err     { color: var(--red); }
+.log-code.timeout { color: var(--text2); }
+.log-ms   { color: var(--text2); font-size: 11px; }
+.log-note { font-size: 11px; }
+.log-note.ok      { color: #5aff9a; }
+.log-note.err     { color: #ff8a80; }
+.log-note.timeout { color: var(--text2); }
+
+/* === FOOTER === */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  font-size: 11px;
+  color: var(--text2);
+  border-top: 1px solid var(--border);
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.next-ping { display: flex; align-items: center; gap: 6px; }
+.cd-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(64,196,255,.1);
+  color: var(--blue);
+  border: 1px solid rgba(64,196,255,.2);
+  font-family: var(--mono);
+  min-width: 32px;
+  text-align: center;
+}
+
+/* === UPTIME BAR === */
+.uptime-wrap {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.uptime-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--text2);
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.uptime-pct {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green);
+}
+.uptime-bar {
+  display: flex;
+  gap: 3px;
+  align-items: flex-end;
+}
+.up-block {
+  flex: 1;
+  border-radius: 3px;
+  background: var(--border);
+  transition: background .3s, height .3s;
+  cursor: default;
+  position: relative;
+}
+.up-block.ok      { background: var(--green); opacity: .8; }
+.up-block.fail    { background: var(--red);   opacity: .8; }
+.up-block.pending { background: var(--border); }
+
+/* === ANIMATIONS === */
+@keyframes ring {
+  0%   { transform: scale(1); opacity: .5; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  50%      { opacity: .3; }
+}
+@keyframes pulse {
+  0%,100% { transform: scale(1); }
+  40%     { transform: scale(1.5); }
+}
+@keyframes rowIn {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.beat { animation: pulse .35s ease-out; }
+
+/* === RESPONSIVE === */
+@media (max-width: 600px) {
+  body { padding: 10px; }
+  .topbar { flex-wrap: wrap; gap: 10px; }
+  .topbar-left { flex: 1; min-width: 0; }
+  .topbar-right { width: 100%; justify-content: flex-end; flex-wrap: wrap; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .log-cols { display: none; }
+  .log-row {
+    grid-template-columns: 90px 44px 60px 1fr;
+    font-size: 11px;
+  }
+  .log-ts   { font-size: 10px; }
+  .log-code { font-size: 12px; }
+  .log-ms   { font-size: 10px; }
+  .log-note { font-size: 10px; }
+  #log { height: clamp(200px, 42vh, 320px); }
+}
+
+@media (max-width: 380px) {
+  .log-row {
+    grid-template-columns: 80px 40px 52px 1fr;
+    font-size: 10px;
+    gap: 5px;
+    padding: 5px 6px;
+  }
+  .btn { padding: 5px 9px; }
+  select { font-size: 11px; }
+  .site-url { display: none; }
+}
+</style>
 </head>
 <body>
-<div class="container">
-  <div class="card">
 
-    <div class="header">
-      <div class="header-left">
+<div class="wrap">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="pulse-ring">
         <div id="dot"></div>
-        <span class="title">Heartbeat Monitor</span>
-        <span class="subtitle">api.minework.net</span>
       </div>
-      <div class="controls">
-        <label>interval</label>
-        <select id="interval-sel">
-          <option value="1000" selected>1s</option>
-          <option value="5000">5s</option>
-          <option value="10000">10s</option>
-          <option value="30000">30s</option>
-        </select>
-        <button id="toggle" onclick="toggleMonitor()">Pause</button>
-        <button onclick="clearLog()">Clear</button>
+      <div>
+        <div class="site-title">Heartbeat Monitor</div>
+        <div class="site-url">api.minework.net/api/mining/v1/heartbeat</div>
       </div>
     </div>
-
-    <div class="stats">
-      <div class="stat-box">
-        <div class="stat-label">total</div>
-        <div class="stat-value" id="stat-total">0</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">success</div>
-        <div class="stat-value green" id="stat-ok">0</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">failed</div>
-        <div class="stat-value red" id="stat-fail">0</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">avg ms</div>
-        <div class="stat-value" id="stat-avg">—</div>
-      </div>
+    <div class="topbar-right">
+      <label style="font-size:11px;color:var(--text2);white-space:nowrap">interval</label>
+      <select id="interval-sel">
+        <option value="1000" selected>1s</option>
+        <option value="5000">5s</option>
+        <option value="10000">10s</option>
+        <option value="30000">30s</option>
+      </select>
+      <button class="btn" id="toggle" onclick="toggleMonitor()">⏸ Pause</button>
+      <button class="btn danger" onclick="clearLog()">Clear</button>
     </div>
-
-    <div id="log">
-      <div class="log-placeholder">Waiting for first ping...</div>
-    </div>
-
-    <div class="footer">
-      <span>next ping in <span id="countdown">—</span></span>
-      <span id="last-status">—</span>
-    </div>
-
   </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat s-total">
+      <div class="stat-label">Total</div>
+      <div class="stat-val" id="stat-total">0</div>
+    </div>
+    <div class="stat s-ok">
+      <div class="stat-label">Success</div>
+      <div class="stat-val" id="stat-ok">0</div>
+    </div>
+    <div class="stat s-fail">
+      <div class="stat-label">Failed</div>
+      <div class="stat-val" id="stat-fail">0</div>
+    </div>
+    <div class="stat s-avg">
+      <div class="stat-label">Avg ms</div>
+      <div class="stat-val" id="stat-avg">—</div>
+    </div>
+  </div>
+
+  <!-- UPTIME BAR -->
+  <div class="uptime-wrap">
+    <div class="uptime-label">
+      <span>Last 60 pings</span>
+      <span class="uptime-pct" id="uptime-pct">—</span>
+    </div>
+    <div class="uptime-bar" id="uptime-bar"></div>
+  </div>
+
+  <!-- LOG PANEL -->
+  <div class="log-panel">
+    <div class="log-header">
+      <span class="log-header-label">Live Log</span>
+      <span id="last-status" style="font-size:11px;color:var(--text2)">—</span>
+    </div>
+    <div class="log-cols">
+      <span>Time</span>
+      <span>Code</span>
+      <span>Latency</span>
+      <span>Status</span>
+    </div>
+    <div id="log">
+      <div class="placeholder">
+        <span class="icon">◉</span>
+        <span>Waiting for first ping...</span>
+      </div>
+    </div>
+    <div class="footer">
+      <div class="next-ping">
+        <span>Next ping in</span>
+        <span class="cd-badge" id="countdown">—</span>
+      </div>
+      <div id="uptime-text" style="color:var(--text2)">uptime: —</div>
+    </div>
+  </div>
+
 </div>
 
 <script>
-  const URL = 'https://api.minework.net/api/mining/v1/heartbeat';
-  let running = true, timer = null, cdTimer = null;
-  let total = 0, ok = 0, fail = 0, times = [], cdVal = 0;
+const ENDPOINT = 'https://api.minework.net/api/mining/v1/heartbeat';
+let running = true, timer = null, cdTimer = null;
+let total = 0, okCount = 0, failCount = 0, times = [], cdVal = 0;
+const HISTORY_SIZE = 60;
+let history = [];
 
-  function pad(n) { return String(n).padStart(2, '0'); }
-  function now() {
-    const d = new Date();
-    return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${String(d.getMilliseconds()).padStart(3,'0')}`;
-  }
+function pad(n, l=2) { return String(n).padStart(l, '0'); }
+function nowStr() {
+  const d = new Date();
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(),3)}`;
+}
 
-  function addRow(code, ms, ts) {
-    const log = document.getElementById('log');
-    const ph = log.querySelector('.log-placeholder');
-    if (ph) ph.remove();
+/* ---------- UPTIME BAR ---------- */
+function renderUptimeBar() {
+  const bar = document.getElementById('uptime-bar');
+  bar.innerHTML = '';
+  const maxH = 24, minH = 6;
+  const maxMs = times.length ? Math.max(...times, 1) : 1;
 
-    const is2xx = code >= 200 && code < 300;
-    const cls   = is2xx ? 'ok' : code === 0 ? 'timeout' : 'err';
-    const label = code === 0 ? 'ERR' : code;
-    const note  = is2xx ? '✓ ok' : code === 0 ? '✕ timeout / error' : '! http error';
-
-    const row = document.createElement('div');
-    row.className = `log-row ${cls}`;
-    row.innerHTML = `
-      <span class="log-ts">${ts}</span>
-      <span class="log-code ${cls}">${label}</span>
-      <span class="log-ms">${ms > 0 ? ms + 'ms' : '—'}</span>
-      <span class="log-note ${cls}">${note}</span>
-    `;
-    log.insertBefore(row, log.firstChild);
-    if (log.children.length > 200) log.removeChild(log.lastChild);
-
-    const dot = document.getElementById('dot');
-    dot.style.background     = is2xx ? '#22c55e' : '#ef4444';
-    dot.style.borderColor    = is2xx ? '#16a34a' : '#b91c1c';
-    dot.classList.remove('beat');
-    void dot.offsetWidth;
-    dot.classList.add('beat');
-
-    document.getElementById('last-status').textContent = `last: ${label} · ${ms > 0 ? ms + 'ms' : 'n/a'}`;
-  }
-
-  function updateStats() {
-    document.getElementById('stat-total').textContent = total;
-    document.getElementById('stat-ok').textContent    = ok;
-    document.getElementById('stat-fail').textContent  = fail;
-    document.getElementById('stat-avg').textContent   =
-      times.length ? Math.round(times.reduce((a,b) => a+b, 0) / times.length) + 'ms' : '—';
-  }
-
-  function startCountdown() {
-    clearInterval(cdTimer);
-    const iv = parseInt(document.getElementById('interval-sel').value);
-    cdVal = Math.round(iv / 1000);
-    document.getElementById('countdown').textContent = cdVal + 's';
-    cdTimer = setInterval(() => {
-      cdVal = Math.max(0, cdVal - 1);
-      document.getElementById('countdown').textContent = cdVal + 's';
-    }, 1000);
-  }
-
-  async function ping() {
-    if (!running) return;
-    const ts = now();
-    const t0 = performance.now();
-    let code = 0, ms = 0;
-    try {
-      const r = await fetch(URL, { signal: AbortSignal.timeout(10000) });
-      ms   = Math.round(performance.now() - t0);
-      code = r.status;
-    } catch(e) {
-      ms   = Math.round(performance.now() - t0);
-      code = 0;
-    }
-    total++;
-    if (code >= 200 && code < 300) { ok++; times.push(ms); if (times.length > 50) times.shift(); }
-    else fail++;
-    addRow(code, ms, ts);
-    updateStats();
-    scheduleNext();
-  }
-
-  function scheduleNext() {
-    if (!running) return;
-    const iv = parseInt(document.getElementById('interval-sel').value);
-    startCountdown();
-    timer = setTimeout(ping, iv);
-  }
-
-  function toggleMonitor() {
-    running = !running;
-    document.getElementById('toggle').textContent = running ? 'Pause' : 'Resume';
-    const dot = document.getElementById('dot');
-    dot.style.animationPlayState = running ? 'running' : 'paused';
-    if (running) {
-      ping();
+  for (let i = 0; i < HISTORY_SIZE; i++) {
+    const b = document.createElement('div');
+    b.className = 'up-block';
+    if (i < history.length) {
+      const entry = history[history.length - HISTORY_SIZE + i];
+      if (entry === undefined) { b.classList.add('pending'); b.style.height = minH+'px'; }
+      else if (entry.ok) {
+        b.classList.add('ok');
+        const h = minH + Math.round((entry.ms / maxMs) * (maxH - minH));
+        b.style.height = Math.min(h, maxH) + 'px';
+        b.title = `${entry.ts} · ${entry.code} · ${entry.ms}ms`;
+      } else {
+        b.classList.add('fail');
+        b.style.height = maxH + 'px';
+        b.title = `${entry.ts} · ${entry.code === 0 ? 'ERR' : entry.code}`;
+      }
     } else {
-      clearTimeout(timer);
-      clearInterval(cdTimer);
-      document.getElementById('countdown').textContent = '—';
+      b.classList.add('pending');
+      b.style.height = minH + 'px';
     }
+    bar.appendChild(b);
   }
 
-  function clearLog() {
-    const log = document.getElementById('log');
-    log.innerHTML = '<div class="log-placeholder">Waiting for first ping...</div>';
+  const okInHistory = history.filter(h => h.ok).length;
+  const pct = history.length ? Math.round((okInHistory / history.length) * 100) : null;
+  const pctEl = document.getElementById('uptime-pct');
+  if (pct !== null) {
+    pctEl.textContent = pct + '%';
+    pctEl.style.color = pct >= 99 ? 'var(--green)' : pct >= 90 ? 'var(--amber)' : 'var(--red)';
+  } else {
+    pctEl.textContent = '—';
   }
+  document.getElementById('uptime-text').textContent =
+    pct !== null ? `uptime: ${pct}% (last ${history.length})` : 'uptime: —';
+}
 
-  document.getElementById('interval-sel').addEventListener('change', () => {
-    clearTimeout(timer);
-    clearInterval(cdTimer);
-    if (running) ping();
-  });
+/* ---------- ADD LOG ROW ---------- */
+function addRow(code, ms, ts) {
+  const log = document.getElementById('log');
+  const ph = log.querySelector('.placeholder');
+  if (ph) ph.remove();
 
-  ping();
+  const is2xx = code >= 200 && code < 300;
+  const cls   = is2xx ? 'ok' : code === 0 ? 'timeout' : 'err';
+  const label = code === 0 ? 'ERR' : code;
+  const note  = is2xx ? '✓ ok' : code === 0 ? '✕ timeout / error' : `! http ${code}`;
+
+  const row = document.createElement('div');
+  row.className = `log-row ${cls}`;
+  row.innerHTML =
+    `<span class="log-ts">${ts}</span>` +
+    `<span class="log-code ${cls}">${label}</span>` +
+    `<span class="log-ms">${ms > 0 ? ms+'ms' : '—'}</span>` +
+    `<span class="log-note ${cls}">${note}</span>`;
+  log.insertBefore(row, log.firstChild);
+  if (log.children.length > 200) log.removeChild(log.lastChild);
+
+  /* dot pulse */
+  const dot = document.getElementById('dot');
+  dot.style.background  = is2xx ? 'var(--green)' : 'var(--red)';
+  dot.style.boxShadow   = is2xx ? '0 0 10px var(--green-glow)' : '0 0 10px rgba(255,82,82,.3)';
+  dot.classList.remove('beat');
+  void dot.offsetWidth;
+  dot.classList.add('beat');
+
+  document.getElementById('last-status').textContent =
+    `last: ${label} · ${ms > 0 ? ms+'ms' : 'n/a'} · ${ts}`;
+}
+
+/* ---------- UPDATE STATS ---------- */
+function updateStats() {
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-ok').textContent    = okCount;
+  document.getElementById('stat-fail').textContent  = failCount;
+  document.getElementById('stat-avg').textContent   =
+    times.length ? Math.round(times.reduce((a,b)=>a+b,0)/times.length)+'ms' : '—';
+}
+
+/* ---------- COUNTDOWN ---------- */
+function startCountdown() {
+  clearInterval(cdTimer);
+  const iv = parseInt(document.getElementById('interval-sel').value);
+  cdVal = Math.round(iv / 1000);
+  document.getElementById('countdown').textContent = cdVal + 's';
+  cdTimer = setInterval(() => {
+    cdVal = Math.max(0, cdVal - 1);
+    document.getElementById('countdown').textContent = cdVal + 's';
+  }, 1000);
+}
+
+/* ---------- PING ---------- */
+async function ping() {
+  if (!running) return;
+  const ts = nowStr();
+  const t0 = performance.now();
+  let code = 0, ms = 0;
+  try {
+    const r = await fetch(ENDPOINT, { signal: AbortSignal.timeout(10000) });
+    ms   = Math.round(performance.now() - t0);
+    code = r.status;
+  } catch(e) {
+    ms   = Math.round(performance.now() - t0);
+    code = 0;
+  }
+  const is2xx = code >= 200 && code < 300;
+  total++;
+  if (is2xx) { okCount++; times.push(ms); if (times.length > 100) times.shift(); }
+  else failCount++;
+
+  history.push({ ok: is2xx, code, ms, ts });
+  if (history.length > HISTORY_SIZE) history.shift();
+
+  addRow(code, ms, ts);
+  updateStats();
+  renderUptimeBar();
+  scheduleNext();
+}
+
+function scheduleNext() {
+  if (!running) return;
+  const iv = parseInt(document.getElementById('interval-sel').value);
+  startCountdown();
+  timer = setTimeout(ping, iv);
+}
+
+/* ---------- CONTROLS ---------- */
+function toggleMonitor() {
+  running = !running;
+  const btn = document.getElementById('toggle');
+  const dot = document.getElementById('dot');
+  btn.textContent = running ? '⏸ Pause' : '▶ Resume';
+  dot.style.animationPlayState = running ? 'running' : 'paused';
+  if (running) {
+    dot.style.background = 'var(--green)';
+    dot.style.boxShadow  = '0 0 8px var(--green-glow)';
+    ping();
+  } else {
+    clearTimeout(timer); clearInterval(cdTimer);
+    document.getElementById('countdown').textContent = '—';
+    dot.style.background = 'var(--text3)';
+    dot.style.boxShadow  = 'none';
+  }
+}
+
+function clearLog() {
+  const log = document.getElementById('log');
+  log.innerHTML = '<div class="placeholder"><span class="icon">◉</span><span>Waiting for first ping...</span></div>';
+  total = 0; okCount = 0; failCount = 0; times = []; history = [];
+  updateStats();
+  renderUptimeBar();
+  document.getElementById('last-status').textContent = '—';
+}
+
+document.getElementById('interval-sel').addEventListener('change', () => {
+  clearTimeout(timer); clearInterval(cdTimer);
+  if (running) ping();
+});
+
+/* ---------- INIT ---------- */
+renderUptimeBar();
+ping();
 </script>
 </body>
 </html>
