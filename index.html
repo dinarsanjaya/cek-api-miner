@@ -8,24 +8,23 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:        #080b0f;
-  --bg2:       #0d1117;
-  --bg3:       #131920;
-  --border:    #1e2a35;
-  --border2:   #243040;
-  --text:      #c9d4e0;
-  --text2:     #5a7080;
-  --text3:     #3a5060;
-  --green:     #00e676;
-  --green-dim: rgba(0,230,118,.12);
-  --green-glow:rgba(0,230,118,.25);
-  --red:       #ff5252;
-  --red-dim:   rgba(255,82,82,.12);
-  --amber:     #ffca28;
-  --amber-dim: rgba(255,202,40,.10);
-  --blue:      #40c4ff;
+  --bg: #0d1117;
+  --bg2: #161b22;
+  --bg3: #1c2128;
+  --border: #21262d;
+  --border2: #30363d;
+  --text: #c9d1d9;
+  --text2: #8b949e;
+  --text3: #484f58;
+  --green: #3fb950;
+  --green-dim: rgba(63,185,80,.10);
+  --red: #f85149;
+  --red-dim: rgba(248,81,73,.10);
+  --amber: #d29922;
+  --blue: #58a6ff;
   --mono: 'IBM Plex Mono', monospace;
   --sans: 'IBM Plex Sans', sans-serif;
+  --radius: 10px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -35,28 +34,11 @@ body {
   color: var(--text);
   font-family: var(--mono);
   min-height: 100dvh;
-  padding: 16px;
-  overflow-x: hidden;
-}
-
-/* === SCANLINE OVERLAY === */
-body::before {
-  content: '';
-  position: fixed; inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0,0,0,.15) 2px,
-    rgba(0,0,0,.15) 4px
-  );
-  pointer-events: none;
-  z-index: 9999;
-  opacity: .4;
+  padding: 20px;
 }
 
 .wrap {
-  max-width: 760px;
+  max-width: 780px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -71,213 +53,197 @@ body::before {
   padding: 14px 18px;
   background: var(--bg2);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius);
   gap: 12px;
+  flex-wrap: wrap;
 }
 .topbar-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   min-width: 0;
 }
-.pulse-ring {
+.pulse-wrap {
   position: relative;
-  width: 14px; height: 14px;
+  width: 12px; height: 12px;
   flex-shrink: 0;
 }
-.pulse-ring::before {
+.pulse-wrap::after {
   content: '';
   position: absolute; inset: -4px;
   border-radius: 50%;
   border: 1.5px solid var(--green);
-  animation: ring 1.4s ease-out infinite;
+  animation: ring 1.6s ease-out infinite;
   opacity: 0;
 }
 #dot {
-  width: 14px; height: 14px;
+  width: 12px; height: 12px;
   border-radius: 50%;
   background: var(--green);
-  box-shadow: 0 0 8px var(--green-glow);
-  transition: background .3s, box-shadow .3s;
-  position: relative;
-  z-index: 1;
+  position: relative; z-index: 1;
+  transition: background .3s;
 }
-.site-title {
-  font-family: var(--sans);
-  font-size: 14px;
-  font-weight: 600;
-  color: #e8f0f8;
-  letter-spacing: .3px;
-}
-.site-url {
-  font-size: 11px;
-  color: var(--text2);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
-}
+.site-name { font-family: var(--sans); font-size: 14px; font-weight: 600; color: #e6edf3; }
+.site-url { font-size: 11px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; }
+
 .topbar-right {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-shrink: 0;
+  flex-wrap: wrap;
 }
-select {
+.lbl { font-size: 11px; color: var(--text2); white-space: nowrap; }
+
+select, input {
   font-family: var(--mono);
   font-size: 12px;
-  padding: 5px 8px;
+  padding: 5px 10px;
   border-radius: 6px;
   border: 1px solid var(--border2);
   background: var(--bg3);
   color: var(--text);
-  cursor: pointer;
   outline: none;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a7080'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 7px center;
-  padding-right: 22px;
 }
-select:focus { border-color: var(--blue); }
+input:focus, select:focus { border-color: var(--blue); }
+#wallet-input { width: 170px; }
+
 .btn {
   font-family: var(--mono);
   font-size: 12px;
   padding: 5px 12px;
   border-radius: 6px;
   border: 1px solid var(--border2);
-  background: var(--bg3);
+  background: transparent;
   color: var(--text);
   cursor: pointer;
-  transition: border-color .15s, background .15s;
+  transition: background .15s, border-color .15s;
   white-space: nowrap;
 }
-.btn:hover { border-color: var(--blue); background: rgba(64,196,255,.07); }
-.btn:active { transform: scale(.97); }
-.btn.danger:hover { border-color: var(--red); background: var(--red-dim); }
+.btn:hover { background: var(--bg3); border-color: var(--blue); }
+.btn.danger:hover { background: var(--red-dim); border-color: var(--red); color: var(--red); }
 
-/* === STATS GRID === */
+/* === STATS === */
 .stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
 }
 .stat {
   background: var(--bg2);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius);
   padding: 14px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  position: relative;
-  overflow: hidden;
+  display: flex; flex-direction: column; gap: 6px;
+  position: relative; overflow: hidden;
 }
-.stat::after {
+.stat::before {
   content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
+  position: absolute; top: 0; left: 0; right: 0;
   height: 2px;
-  border-radius: 10px 10px 0 0;
   background: var(--accent, transparent);
-  transition: background .3s;
+  border-radius: var(--radius) var(--radius) 0 0;
 }
-.stat.s-total  { --accent: var(--blue); }
-.stat.s-ok     { --accent: var(--green); }
-.stat.s-fail   { --accent: var(--red); }
-.stat.s-avg    { --accent: var(--amber); }
+.stat.s-total { --accent: var(--blue); }
+.stat.s-ok    { --accent: var(--green); }
+.stat.s-fail  { --accent: var(--red); }
+.stat.s-avg   { --accent: var(--amber); }
+
 .stat-label {
-  font-size: 10px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 1.2px; text-transform: uppercase;
   color: var(--text2);
 }
 .stat-val {
   font-size: clamp(20px, 4vw, 26px);
-  font-weight: 600;
-  color: #e8f0f8;
-  line-height: 1;
+  font-weight: 600; line-height: 1;
+  color: #e6edf3;
 }
-.stat.s-ok   .stat-val { color: var(--green); }
+.stat.s-ok .stat-val   { color: var(--green); }
 .stat.s-fail .stat-val { color: var(--red); }
-.stat.s-avg  .stat-val { color: var(--amber); }
+.stat.s-avg .stat-val  { color: var(--amber); }
+
+/* === UPTIME BAR === */
+.uptime-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+.uptime-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 10px;
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--text2);
+}
+.uptime-pct { font-size: 12px; font-weight: 600; color: var(--green); letter-spacing: 0; }
+.uptime-bar {
+  display: flex; gap: 3px; align-items: flex-end; height: 28px;
+}
+.up-block {
+  flex: 1; border-radius: 3px;
+  background: var(--border2);
+  height: 6px; min-width: 0;
+  transition: background .3s, height .3s;
+}
+.up-block.ok   { background: var(--green); opacity: .8; }
+.up-block.fail { background: var(--red); opacity: .8; }
 
 /* === LOG PANEL === */
 .log-panel {
   background: var(--bg2);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius);
   overflow: hidden;
 }
-.log-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.log-head {
+  display: flex; align-items: center; justify-content: space-between;
   padding: 10px 16px;
   border-bottom: 1px solid var(--border);
-  gap: 8px;
 }
-.log-header-label {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
+.log-head-label {
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
   color: var(--text2);
 }
+#last-status { font-size: 11px; color: var(--text2); }
+
 .log-cols {
   display: grid;
   grid-template-columns: 110px 52px 70px 1fr;
   gap: 8px;
-  padding: 6px 14px;
-  font-size: 10px;
-  color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  padding: 6px 16px;
+  font-size: 10px; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 1px;
   border-bottom: 1px solid var(--border);
 }
 #log {
-  height: clamp(240px, 45vh, 380px);
+  height: clamp(240px, 42vh, 360px);
   overflow-y: auto;
   padding: 6px 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
+  display: flex; flex-direction: column; gap: 3px;
   scroll-behavior: smooth;
 }
-#log::-webkit-scrollbar { width: 4px; }
-#log::-webkit-scrollbar-track { background: transparent; }
+#log::-webkit-scrollbar { width: 3px; }
 #log::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
 .placeholder {
-  color: var(--text3);
-  font-size: 12px;
-  text-align: center;
-  margin: auto;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-.placeholder .icon {
-  font-size: 20px;
-  opacity: .4;
-  animation: blink 2s ease-in-out infinite;
+  color: var(--text3); font-size: 12px;
+  text-align: center; margin: auto; padding: 24px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
 }
 .log-row {
   display: grid;
   grid-template-columns: 110px 52px 70px 1fr;
-  gap: 8px;
-  align-items: center;
-  padding: 6px 8px;
-  border-radius: 6px;
+  gap: 8px; align-items: center;
+  padding: 6px 8px; border-radius: 6px;
   font-size: 12px;
   animation: rowIn .2s ease-out;
 }
 .log-row.ok      { background: var(--green-dim); }
 .log-row.err     { background: var(--red-dim); }
-.log-row.timeout { background: rgba(90,112,128,.07); }
+.log-row.timeout { background: rgba(72,79,88,.12); }
+
 .log-ts   { color: var(--text2); font-size: 11px; }
 .log-code { font-weight: 600; text-align: center; font-size: 13px; }
 .log-code.ok      { color: var(--green); }
@@ -285,124 +251,50 @@ select:focus { border-color: var(--blue); }
 .log-code.timeout { color: var(--text2); }
 .log-ms   { color: var(--text2); font-size: 11px; }
 .log-note { font-size: 11px; }
-.log-note.ok      { color: #5aff9a; }
-.log-note.err     { color: #ff8a80; }
+.log-note.ok      { color: #56d364; }
+.log-note.err     { color: #ff7b72; }
 .log-note.timeout { color: var(--text2); }
 
 /* === FOOTER === */
 .footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 16px;
-  font-size: 11px;
-  color: var(--text2);
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 16px; font-size: 11px; color: var(--text2);
   border-top: 1px solid var(--border);
-  gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: wrap; gap: 8px;
 }
-.next-ping { display: flex; align-items: center; gap: 6px; }
 .cd-badge {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: rgba(64,196,255,.1);
+  font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: 4px;
+  background: rgba(88,166,255,.10);
   color: var(--blue);
-  border: 1px solid rgba(64,196,255,.2);
-  font-family: var(--mono);
-  min-width: 32px;
-  text-align: center;
+  border: 1px solid rgba(88,166,255,.20);
+  min-width: 30px; text-align: center;
+  display: inline-block;
 }
-
-/* === UPTIME BAR === */
-.uptime-wrap {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 14px 16px;
-}
-.uptime-label {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-  color: var(--text2);
-  margin-bottom: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.uptime-pct {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--green);
-}
-.uptime-bar {
-  display: flex;
-  gap: 3px;
-  align-items: flex-end;
-}
-.up-block {
-  flex: 1;
-  border-radius: 3px;
-  background: var(--border);
-  transition: background .3s, height .3s;
-  cursor: default;
-  position: relative;
-}
-.up-block.ok      { background: var(--green); opacity: .8; }
-.up-block.fail    { background: var(--red);   opacity: .8; }
-.up-block.pending { background: var(--border); }
 
 /* === ANIMATIONS === */
 @keyframes ring {
   0%   { transform: scale(1); opacity: .5; }
-  100% { transform: scale(2.2); opacity: 0; }
-}
-@keyframes blink {
-  0%,100% { opacity: 1; }
-  50%      { opacity: .3; }
-}
-@keyframes pulse {
-  0%,100% { transform: scale(1); }
-  40%     { transform: scale(1.5); }
+  100% { transform: scale(2.4); opacity: 0; }
 }
 @keyframes rowIn {
-  from { opacity: 0; transform: translateX(-6px); }
+  from { opacity: 0; transform: translateX(-5px); }
   to   { opacity: 1; transform: translateX(0); }
 }
-.beat { animation: pulse .35s ease-out; }
+@keyframes beat {
+  0%,100% { transform: scale(1); }
+  40%     { transform: scale(1.6); }
+}
+.beating { animation: beat .35s ease-out; }
 
 /* === RESPONSIVE === */
-@media (max-width: 600px) {
-  body { padding: 10px; }
-  .topbar { flex-wrap: wrap; gap: 10px; }
-  .topbar-left { flex: 1; min-width: 0; }
-  .topbar-right { width: 100%; justify-content: flex-end; flex-wrap: wrap; }
-  .stats { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 560px) {
+  body { padding: 12px; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .log-cols { display: none; }
-  .log-row {
-    grid-template-columns: 90px 44px 60px 1fr;
-    font-size: 11px;
-  }
-  .log-ts   { font-size: 10px; }
-  .log-code { font-size: 12px; }
-  .log-ms   { font-size: 10px; }
-  .log-note { font-size: 10px; }
-  #log { height: clamp(200px, 42vh, 320px); }
-}
-
-@media (max-width: 380px) {
-  .log-row {
-    grid-template-columns: 80px 40px 52px 1fr;
-    font-size: 10px;
-    gap: 5px;
-    padding: 5px 6px;
-  }
-  .btn { padding: 5px 9px; }
-  select { font-size: 11px; }
+  .log-row { grid-template-columns: 85px 42px 58px 1fr; font-size: 11px; }
   .site-url { display: none; }
+  #wallet-input { width: 130px; }
 }
 </style>
 </head>
@@ -413,20 +305,20 @@ select:focus { border-color: var(--blue); }
   <!-- TOP BAR -->
   <div class="topbar">
     <div class="topbar-left">
-      <div class="pulse-ring">
-        <div id="dot"></div>
-      </div>
+      <div class="pulse-wrap"><div id="dot"></div></div>
       <div>
-        <div class="site-title">Heartbeat Monitor</div>
-        <div class="site-url">api.minework.net/api/mining/v1/heartbeat</div>
+        <div class="site-name">Heartbeat Monitor</div>
+        <div class="site-url" id="api-url">https://minework.net/api/miners/...</div>
       </div>
     </div>
     <div class="topbar-right">
-      <label style="font-size:11px;color:var(--text2);white-space:nowrap">interval</label>
+      <span class="lbl">wallet</span>
+      <input id="wallet-input" type="text" placeholder="0x..." value="" />
+      <span class="lbl">interval</span>
       <select id="interval-sel">
-        <option value="1000" selected>1s</option>
+        <option value="1000">1s</option>
         <option value="5000">5s</option>
-        <option value="10000">10s</option>
+        <option value="10000" selected>10s</option>
         <option value="30000">30s</option>
       </select>
       <button class="btn" id="toggle" onclick="toggleMonitor()">⏸ Pause</button>
@@ -455,8 +347,8 @@ select:focus { border-color: var(--blue); }
   </div>
 
   <!-- UPTIME BAR -->
-  <div class="uptime-wrap">
-    <div class="uptime-label">
+  <div class="uptime-card">
+    <div class="uptime-head">
       <span>Last 60 pings</span>
       <span class="uptime-pct" id="uptime-pct">—</span>
     </div>
@@ -465,78 +357,75 @@ select:focus { border-color: var(--blue); }
 
   <!-- LOG PANEL -->
   <div class="log-panel">
-    <div class="log-header">
-      <span class="log-header-label">Live Log</span>
-      <span id="last-status" style="font-size:11px;color:var(--text2)">—</span>
+    <div class="log-head">
+      <span class="log-head-label">Live log</span>
+      <span id="last-status">—</span>
     </div>
     <div class="log-cols">
-      <span>Time</span>
-      <span>Code</span>
-      <span>Latency</span>
-      <span>Status</span>
+      <span>Time</span><span>Code</span><span>Latency</span><span>Status</span>
     </div>
     <div id="log">
-      <div class="placeholder">
-        <span class="icon">◉</span>
-        <span>Waiting for first ping...</span>
-      </div>
+      <div class="placeholder"><span>◉</span><span>Waiting for first ping...</span></div>
     </div>
     <div class="footer">
-      <div class="next-ping">
+      <div style="display:flex;align-items:center;gap:8px">
         <span>Next ping in</span>
         <span class="cd-badge" id="countdown">—</span>
       </div>
-      <div id="uptime-text" style="color:var(--text2)">uptime: —</div>
+      <span id="uptime-text">uptime: —</span>
     </div>
   </div>
 
 </div>
 
 <script>
-const ENDPOINT = 'https://api.minework.net/api/mining/v1/heartbeat';
+const DEFAULT_WALLET = '';
 let running = true, timer = null, cdTimer = null;
 let total = 0, okCount = 0, failCount = 0, times = [], cdVal = 0;
 const HISTORY_SIZE = 60;
 let history = [];
 
+function getEndpoint() {
+  const w = document.getElementById('wallet-input').value.trim() || DEFAULT_WALLET;
+  document.getElementById('api-url').textContent = 'https://minework.net/api/miners/...' + w.slice(-6);
+  return 'https://minework.net/api/miners/' + w;
+}
+
 function pad(n, l=2) { return String(n).padStart(l, '0'); }
 function nowStr() {
   const d = new Date();
-  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(),3)}`;
+  return pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())+'.'+pad(d.getMilliseconds(),3);
 }
 
-/* ---------- UPTIME BAR ---------- */
 function renderUptimeBar() {
   const bar = document.getElementById('uptime-bar');
   bar.innerHTML = '';
   const maxH = 24, minH = 6;
   const maxMs = times.length ? Math.max(...times, 1) : 1;
-
+  const slice = history.slice(-HISTORY_SIZE);
   for (let i = 0; i < HISTORY_SIZE; i++) {
     const b = document.createElement('div');
     b.className = 'up-block';
-    if (i < history.length) {
-      const entry = history[history.length - HISTORY_SIZE + i];
-      if (entry === undefined) { b.classList.add('pending'); b.style.height = minH+'px'; }
-      else if (entry.ok) {
+    if (i < slice.length) {
+      const e = slice[i];
+      if (e.ok) {
         b.classList.add('ok');
-        const h = minH + Math.round((entry.ms / maxMs) * (maxH - minH));
+        const h = minH + Math.round((e.ms / maxMs) * (maxH - minH));
         b.style.height = Math.min(h, maxH) + 'px';
-        b.title = `${entry.ts} · ${entry.code} · ${entry.ms}ms`;
+        b.title = e.ts + ' · ' + e.code + ' · ' + e.ms + 'ms';
       } else {
         b.classList.add('fail');
         b.style.height = maxH + 'px';
-        b.title = `${entry.ts} · ${entry.code === 0 ? 'ERR' : entry.code}`;
+        b.title = e.ts + ' · ' + (e.code || 'ERR');
       }
     } else {
-      b.classList.add('pending');
       b.style.height = minH + 'px';
     }
     bar.appendChild(b);
   }
-
-  const okInHistory = history.filter(h => h.ok).length;
-  const pct = history.length ? Math.round((okInHistory / history.length) * 100) : null;
+  const okN = history.filter(h => h.ok).length;
+  const tot = Math.min(history.length, HISTORY_SIZE);
+  const pct = tot ? Math.round((okN / tot) * 100) : null;
   const pctEl = document.getElementById('uptime-pct');
   if (pct !== null) {
     pctEl.textContent = pct + '%';
@@ -545,52 +434,43 @@ function renderUptimeBar() {
     pctEl.textContent = '—';
   }
   document.getElementById('uptime-text').textContent =
-    pct !== null ? `uptime: ${pct}% (last ${history.length})` : 'uptime: —';
+    pct !== null ? 'uptime: ' + pct + '% (' + tot + ')' : 'uptime: —';
 }
 
-/* ---------- ADD LOG ROW ---------- */
 function addRow(code, ms, ts) {
   const log = document.getElementById('log');
   const ph = log.querySelector('.placeholder');
   if (ph) ph.remove();
-
   const is2xx = code >= 200 && code < 300;
-  const cls   = is2xx ? 'ok' : code === 0 ? 'timeout' : 'err';
+  const cls = is2xx ? 'ok' : code === 0 ? 'timeout' : 'err';
   const label = code === 0 ? 'ERR' : code;
-  const note  = is2xx ? '✓ ok' : code === 0 ? '✕ timeout / error' : `! http ${code}`;
-
+  const note = is2xx ? '✓ ok' : code === 0 ? '✕ timeout / error' : '! http ' + code;
   const row = document.createElement('div');
-  row.className = `log-row ${cls}`;
+  row.className = 'log-row ' + cls;
   row.innerHTML =
-    `<span class="log-ts">${ts}</span>` +
-    `<span class="log-code ${cls}">${label}</span>` +
-    `<span class="log-ms">${ms > 0 ? ms+'ms' : '—'}</span>` +
-    `<span class="log-note ${cls}">${note}</span>`;
+    '<span class="log-ts">' + ts + '</span>' +
+    '<span class="log-code ' + cls + '">' + label + '</span>' +
+    '<span class="log-ms">' + (ms > 0 ? ms + 'ms' : '—') + '</span>' +
+    '<span class="log-note ' + cls + '">' + note + '</span>';
   log.insertBefore(row, log.firstChild);
   if (log.children.length > 200) log.removeChild(log.lastChild);
-
-  /* dot pulse */
   const dot = document.getElementById('dot');
-  dot.style.background  = is2xx ? 'var(--green)' : 'var(--red)';
-  dot.style.boxShadow   = is2xx ? '0 0 10px var(--green-glow)' : '0 0 10px rgba(255,82,82,.3)';
-  dot.classList.remove('beat');
+  dot.style.background = is2xx ? 'var(--green)' : 'var(--red)';
+  dot.classList.remove('beating');
   void dot.offsetWidth;
-  dot.classList.add('beat');
-
+  dot.classList.add('beating');
   document.getElementById('last-status').textContent =
-    `last: ${label} · ${ms > 0 ? ms+'ms' : 'n/a'} · ${ts}`;
+    'last: ' + label + ' · ' + (ms > 0 ? ms + 'ms' : 'n/a') + ' · ' + ts;
 }
 
-/* ---------- UPDATE STATS ---------- */
 function updateStats() {
   document.getElementById('stat-total').textContent = total;
-  document.getElementById('stat-ok').textContent    = okCount;
-  document.getElementById('stat-fail').textContent  = failCount;
-  document.getElementById('stat-avg').textContent   =
-    times.length ? Math.round(times.reduce((a,b)=>a+b,0)/times.length)+'ms' : '—';
+  document.getElementById('stat-ok').textContent = okCount;
+  document.getElementById('stat-fail').textContent = failCount;
+  document.getElementById('stat-avg').textContent =
+    times.length ? Math.round(times.reduce((a,b)=>a+b,0)/times.length) + 'ms' : '—';
 }
 
-/* ---------- COUNTDOWN ---------- */
 function startCountdown() {
   clearInterval(cdTimer);
   const iv = parseInt(document.getElementById('interval-sel').value);
@@ -602,28 +482,25 @@ function startCountdown() {
   }, 1000);
 }
 
-/* ---------- PING ---------- */
 async function ping() {
   if (!running) return;
   const ts = nowStr();
   const t0 = performance.now();
   let code = 0, ms = 0;
   try {
-    const r = await fetch(ENDPOINT, { signal: AbortSignal.timeout(10000) });
-    ms   = Math.round(performance.now() - t0);
+    const r = await fetch(getEndpoint(), { signal: AbortSignal.timeout(12000) });
+    ms = Math.round(performance.now() - t0);
     code = r.status;
   } catch(e) {
-    ms   = Math.round(performance.now() - t0);
+    ms = Math.round(performance.now() - t0);
     code = 0;
   }
   const is2xx = code >= 200 && code < 300;
   total++;
   if (is2xx) { okCount++; times.push(ms); if (times.length > 100) times.shift(); }
   else failCount++;
-
   history.push({ ok: is2xx, code, ms, ts });
-  if (history.length > HISTORY_SIZE) history.shift();
-
+  if (history.length > HISTORY_SIZE + 10) history.shift();
   addRow(code, ms, ts);
   updateStats();
   renderUptimeBar();
@@ -637,31 +514,26 @@ function scheduleNext() {
   timer = setTimeout(ping, iv);
 }
 
-/* ---------- CONTROLS ---------- */
 function toggleMonitor() {
   running = !running;
   const btn = document.getElementById('toggle');
   const dot = document.getElementById('dot');
   btn.textContent = running ? '⏸ Pause' : '▶ Resume';
-  dot.style.animationPlayState = running ? 'running' : 'paused';
   if (running) {
     dot.style.background = 'var(--green)';
-    dot.style.boxShadow  = '0 0 8px var(--green-glow)';
     ping();
   } else {
     clearTimeout(timer); clearInterval(cdTimer);
     document.getElementById('countdown').textContent = '—';
     dot.style.background = 'var(--text3)';
-    dot.style.boxShadow  = 'none';
   }
 }
 
 function clearLog() {
-  const log = document.getElementById('log');
-  log.innerHTML = '<div class="placeholder"><span class="icon">◉</span><span>Waiting for first ping...</span></div>';
+  document.getElementById('log').innerHTML =
+    '<div class="placeholder"><span>◉</span><span>Waiting for first ping...</span></div>';
   total = 0; okCount = 0; failCount = 0; times = []; history = [];
-  updateStats();
-  renderUptimeBar();
+  updateStats(); renderUptimeBar();
   document.getElementById('last-status').textContent = '—';
 }
 
@@ -669,8 +541,9 @@ document.getElementById('interval-sel').addEventListener('change', () => {
   clearTimeout(timer); clearInterval(cdTimer);
   if (running) ping();
 });
+document.getElementById('wallet-input').addEventListener('change', getEndpoint);
 
-/* ---------- INIT ---------- */
+getEndpoint();
 renderUptimeBar();
 ping();
 </script>
